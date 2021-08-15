@@ -1,19 +1,11 @@
-using IdentityStudy.Areas.Identity.Data;
 using IdentityStudy.Config;
-using IdentityStudy.Extensions;
-using Microsoft.AspNetCore.Authorization;
+using KissLog.AspNetCore;
+using KissLog.CloudListeners.RequestLogsListener;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace IdentityStudy
 {
@@ -24,8 +16,8 @@ namespace IdentityStudy
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(hostEnviroment.ContentRootPath)
-                .AddJsonFile(path: "appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile(path: $"appsettings.{hostEnviroment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                .AddJsonFile(path: "appsettings.json", true, true)
+                .AddJsonFile(path: $"appsettings.{hostEnviroment.EnvironmentName}.json", true,  true)
                 .AddEnvironmentVariables();
 
             if (hostEnviroment.IsProduction())
@@ -61,16 +53,22 @@ namespace IdentityStudy
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/erro/500");
+                app.UseStatusCodePagesWithRedirects("/erro/{0}");
                 app.UseHsts();
             }
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseCookiePolicy();
 
             app.UseRouting();
 
             app.UseAuthentication();
-            app.UseAuthorization();
+
+            app.UseKissLogMiddleware(options => {
+                LogConfig.ConfigureKissLog(options, Configuration);
+            });
 
 
             app.UseMvc(routes =>

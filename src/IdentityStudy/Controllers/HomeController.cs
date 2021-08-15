@@ -1,22 +1,18 @@
 ﻿using IdentityStudy.Extensions;
 using IdentityStudy.Models;
+using KissLog;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using static IdentityStudy.Extensions.CustomAuth;
 
 namespace IdentityStudy.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-       
-        public HomeController(ILogger<HomeController> logger)
+        private readonly ILogger _logger;
+
+        public HomeController(ILogger logger)
         {
             _logger = logger;
         }
@@ -24,12 +20,14 @@ namespace IdentityStudy.Controllers
         [AllowAnonymous]
         public IActionResult Index()
         {
+            _logger.Trace("The user has reached the index");
             return View();
         }
 
-        [Authorize]
+
         public IActionResult Privacy()
         {
+            throw new Exception("Erro");
             return View();
         }
 
@@ -56,16 +54,42 @@ namespace IdentityStudy.Controllers
 
         //CUSTOMIZED CLAIMS
         //VIEW THE DATA TABLE AND THE CUSTOMAUTH CLASS TO UNDERSTAND THE IMPLEMENTATION
-        [ClaimsAuthorize("Products", "Read") ]
+        [ClaimsAuthorize("Products", "Read")]
         public IActionResult ClaimsCustom()
         {
             return View("Secret");
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        [Route("erro/{id:length(3,3)}")]
+        public IActionResult Error(int id)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var modelErro = new ErrorViewModel();
+
+            if (id == 500)
+            {
+                modelErro.Message = "An Error has occured! try again later";
+                modelErro.Title = "An Error has occured!";
+                modelErro.ErroCode = id;
+            }
+            else if(id == 404)
+            {
+                modelErro.Message = "The page you requested was not found!";
+                modelErro.Title = "Ops! Page not found.";
+                modelErro.ErroCode = id;
+            }
+            else if (id == 403)
+            {
+                modelErro.Message = "You dont have access to this page!";
+                modelErro.Title = "Access denied.";
+                modelErro.ErroCode = id;
+            }
+            else
+            {
+                return StatusCode(404);
+            }
+
+
+            return View("Error", modelErro);
         }
     }
 }
