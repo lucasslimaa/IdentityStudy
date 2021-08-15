@@ -19,12 +19,25 @@ namespace IdentityStudy
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public IConfiguration Configuration { get; }
+        public Startup(IWebHostEnvironment hostEnviroment)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(hostEnviroment.ContentRootPath)
+                .AddJsonFile(path: "appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile(path: $"appsettings.{hostEnviroment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables();
+
+            if (hostEnviroment.IsProduction())
+            {
+                builder.AddUserSecrets<Startup>();
+            }
+
+            Configuration = builder.Build();
+
         }
 
-        public IConfiguration Configuration { get; }
+
 
         public void ConfigureServices(IServiceCollection services)
         {
