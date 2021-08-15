@@ -27,7 +27,17 @@ namespace IdentityStudy.Controllers
 
         public IActionResult Privacy()
         {
-            throw new Exception("Erro");
+            try
+            {
+                throw new Exception("Something went terribly wrong!");
+            }
+            catch (Exception e)
+            {
+
+                _logger.Error(e);
+                throw;
+            }
+            
             return View();
         }
 

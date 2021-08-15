@@ -12,7 +12,6 @@ namespace IdentityStudy.Config
     {
         public static void ConfigureKissLog(IOptionsBuilder options, IConfiguration configuration)
         {
-            // optional KissLog configuration
             options.Options
                 .AppendExceptionDetails((Exception ex) =>
                 {
@@ -26,24 +25,22 @@ namespace IdentityStudy.Config
                     return sb.ToString();
                 });
 
-            // KissLog internal logs
             options.InternalLog = (message) =>
             {
                 Debug.WriteLine(message);
             };
 
-            // register logs output
             RegisterKissLogListeners(options, configuration);
         }
 
         public static void RegisterKissLogListeners(IOptionsBuilder options, IConfiguration configuration) =>
 
             options.Listeners.Add(new RequestLogsApiListener(new Application(
-                configuration["KissLog.OrganizationId"],    //  "83e799f3-e9f9-42af-a3fa-d245978b23c2"
-                configuration["KissLog.ApplicationId"])     //  "c2ca1f90-c9c4-4807-99bd-d594662b7909"
+                configuration["KissLog.OrganizationId"], 
+                configuration["KissLog.ApplicationId"])  
             )
             {
-                ApiUrl = configuration["KissLog.ApiUrl"]    //  "https://api.kisslog.net"
+                ApiUrl = configuration["KissLog.ApiUrl"]
             });
     }
 }

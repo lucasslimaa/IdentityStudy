@@ -1,6 +1,6 @@
 using IdentityStudy.Config;
+using IdentityStudy.Extensions;
 using KissLog.AspNetCore;
-using KissLog.CloudListeners.RequestLogsListener;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -35,7 +35,13 @@ namespace IdentityStudy
         {
             services.AddControllersWithViews();
 
-            services.AddMvc().AddMvcOptions(op => op.EnableEndpointRouting=false);
+            services.AddMvc().AddMvcOptions(op =>
+            {
+                op.EnableEndpointRouting = false;
+                op.Filters.Add(typeof(AuditFilter));
+            });
+               
+                
 
             services.AddIdentityConfig(Configuration);
 

@@ -14,11 +14,14 @@ namespace IdentityStudy.Config
             services.AddSingleton<IAuthorizationHandler, RequiredPermissionsHandler>();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
             services.AddScoped((context) => Logger.Factory.Get());
             services.AddLogging(logging =>
             {
                 logging.AddKissLog();
             });
+
+            services.AddScoped<AuditFilter>();
 
             return services;
         }
