@@ -1,4 +1,5 @@
 using IdentityStudy.Areas.Identity.Data;
+using IdentityStudy.Config;
 using IdentityStudy.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -25,31 +26,18 @@ namespace IdentityStudy
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
 
             services.AddMvc().AddMvcOptions(op => op.EnableEndpointRouting=false);
 
-            services.AddDbContext<IdentityStudyContext>(options =>
-                   options.UseSqlServer(
-                       Configuration.GetConnectionString("IdentityStudyContextConnection")));
+            services.AddIdentityConfig(Configuration);
 
-            services.AddDefaultIdentity<IdentityUser>()
-                .AddRoles<IdentityRole>()
-                .AddDefaultUI()
-                .AddEntityFrameworkStores<IdentityStudyContext>();
+            services.AddAuthorizationConfig();
 
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy(name: "CanDelete", configurePolicy: policy => policy.RequireClaim("CanDelete"));
+            services.ResolveDependencies();
 
-                options.AddPolicy(name: "CanRead", configurePolicy: policy => policy.Requirements.Add(new RequiredPermissions(permission: "CanRead")));
-                options.AddPolicy(name: "CanWrite", configurePolicy: policy => policy.Requirements.Add(new RequiredPermissions(permission: "CanWrite")));
-            });
-
-            services.AddSingleton<IAuthorizationHandler,RequiredPermissionsHandler>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -61,7 +49,6 @@ namespace IdentityStudy
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
             app.UseHttpsRedirection();
